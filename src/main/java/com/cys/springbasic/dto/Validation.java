@@ -1,10 +1,15 @@
 package com.cys.springbasic.dto;
 
 import org.hibernate.validator.constraints.Length;
+import org.hibernate.validator.constraints.Range;
 
+import jakarta.validation.constraints.Max;
+import jakarta.validation.constraints.Min;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotEmpty;
 import jakarta.validation.constraints.NotNull;
+import jakarta.validation.constraints.Pattern;
+import jakarta.validation.constraints.Size;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -42,5 +47,26 @@ public class Validation {
     @Length(min=4)
     @NotNull
     private String length;
+
+    // @Min(), @Max(): 정수의 최소 최대 값을 지정
+    @Min(10)
+    @Max(20)
+    @NotNull
+    private Integer minMax;
+
+    // @Range(min=?, max=?)
+    @Range(min = 5, max = 25)
+    @NotNull
+    private Integer range;
+
+    // @Size(min=?, max=?): 컬렉션의 길이 최소 최대값을 지정
+    @Size(min = 2, max = 4)
+    @NotNull
+    private Integer[] size;
+
+    // @Pattern(regexp=정규식): 정규식을 이용하여 문자열의 패턴을 검사
+    @Pattern(regexp = "^[a-zA-Z]*$")
+    @NotNull
+    private String pattern;
 
 }
