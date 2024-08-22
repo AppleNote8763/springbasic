@@ -8,6 +8,9 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
+import com.cys.springbasic.dto.Validation;
+
+import jakarta.validation.Valid;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -80,6 +83,13 @@ public class RequestDataContoller {
         @RequestBody SampleDto requestBody
     ) {
         return "Request Body data: " + requestBody.getName() + ", " + requestBody.getAge();
+    }
+
+    @PostMapping("/validation")
+    public String validation(
+        @RequestBody @Valid Validation requestBody
+    ) {
+        return "정상";
     }
 
 }
