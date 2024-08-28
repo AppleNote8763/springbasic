@@ -70,7 +70,7 @@ public class SampleServiceImplement implements SampleService {
     @Override
     public ResponseEntity<String> queryMethod() {
 
-        List<SampleUserEntity> sampleUserEntities = sampleUserRepository.getJpql2("홍길동", "부산광역시");
+        List<SampleUserEntity> sampleUserEntities = sampleUserRepository.getNativeSql("홍길동", "부산광역시");
 
         return ResponseEntity.status(HttpStatus.OK).body(sampleUserEntities.toString());
 
