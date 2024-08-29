@@ -9,5 +9,6 @@ public interface SampleService {
     ResponseEntity<String> postSample1 (PostSample1RequestDto dto);
     ResponseEntity<String> deleteSample1 (String sampleId);
     ResponseEntity<String> queryMethod();
+    String getJwt(String name);
 
 }
