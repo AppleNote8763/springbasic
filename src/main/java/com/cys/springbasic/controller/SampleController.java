@@ -52,4 +52,12 @@ public class SampleController {
         return response;
     }
 
+    @PostMapping("/jwt")
+    public String validateJwt(
+        @RequestBody String jwt
+    ) {
+        String response = sampleService.validateJwt(jwt);
+        return response;
+    }
+
 }

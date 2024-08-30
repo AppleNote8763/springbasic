@@ -64,4 +64,6 @@ extends JpaRepository<SampleUserEntity, String> {
         @Param("address") String address
     );  // "SELECT * " + "FROM sample_user " + "WHERE name = :name " + "AND address = :address" 공백을 포함시켜줘야함
 
+    SampleUserEntity findByUserId(String userId);
+
 }
