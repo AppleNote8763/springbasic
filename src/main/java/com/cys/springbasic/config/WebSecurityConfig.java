@@ -1,5 +1,7 @@
 package com.cys.springbasic.config;
 
+import java.io.IOException;
+
 import org.springframework.beans.factory.annotation.Configurable;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -9,14 +11,20 @@ import org.springframework.security.config.annotation.web.configuration.EnableWe
 import org.springframework.security.config.annotation.web.configurers.CsrfConfigurer;
 import org.springframework.security.config.annotation.web.configurers.HttpBasicConfigurer;
 import org.springframework.security.config.http.SessionCreationPolicy;
+import org.springframework.security.core.AuthenticationException;
+import org.springframework.security.web.AuthenticationEntryPoint;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
+import org.springframework.security.web.server.SecurityWebFilterChain;
 import org.springframework.web.cors.CorsConfiguration;
 import org.springframework.web.cors.CorsConfigurationSource;
 import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
 
 import com.cys.springbasic.filter.JwtAuthenticationFilter;
 
+import jakarta.servlet.ServletException;
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
 
 // Spring Web 보안 설정
@@ -53,7 +61,7 @@ public class WebSecurityConfig {
             // Session 유지 방식에 대한 설정
             // Session 유지를 하지 않겠다고 지정
             .sessionManagement(sessionManagement -> sessionManagement.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
-            
+
             // CSRF (Cross-Site Request Forgery)
             // - 클라이언트가 자신의 의도와는 무관하게 공격행위를 하는 것
 
@@ -67,23 +75,29 @@ public class WebSecurityConfig {
 
             // CORS 정책 설정
             .cors(cors -> cors.configurationSource(corsConfigurationSource()))
-            
+
             // 요청 URL의 패턴에 따라 인증이 필요한 작업인지 인가가 필요한 작업인지 지정하는 설정
             // - 모든 클라이언트가 접근할 수 있도록 허용
             // - 인증된 모든 클라이언트가 접근할 수 있도록 허용
             // - 인증된 클라이언트 중 특정 권한을 가진 클라이언트만 접근할 수 있도록 허용
-            .authorizeHttpRequests(ruquest -> ruquest
-                // requestMatchers(): URL 패턴, HTTP 메서드 + URL 패턴, HTTP 메서드 마다 접근 허용 방식을 지정하는 메서드 
-                // permitAll(): 모든 클라이언트가 접근할 수 있도록 지정
-                // hasRole(권한): 특정 권한을 가진 클라이언트만 접근할 수 있도록 지정
+            .authorizeHttpRequests(request -> request
+                // requestMatchers(): URL 패턴, HTTP 메서드 + URL 패턴, HTTP 메서드 마다 접근 허용 방식을 지정하는 메서드
                 // authenticated(): 인증된 모든 클라이언트가 접근할 수 있도록 지정
+                // permitAll(): 모든 클라이언트가 접근할 수 있도록 지정
                 .requestMatchers("/anyone/**").permitAll()
+                .requestMatchers(HttpMethod.GET, "/sample/jwt/*").permitAll()
+                // hasRole(권한): 특정 권한을 가진 클라이언트만 접근할 수 있도록 지정
                 .requestMatchers("/admin/**").hasRole("ADMIN")
+                .requestMatchers("/service").hasRole("ADMIN")
+                // .requestMatchers(HttpMethod.GET).authenticated()
                 .requestMatchers("/user/**").authenticated()
-                .requestMatchers(HttpMethod.GET).authenticated()
                 .requestMatchers(HttpMethod.POST, "/notice").hasRole("ADMIN")
                 // anyRequest(): requestMatchers로 지정한 메서드 혹은 URL이 아닌 모든 요청
                 .anyRequest().authenticated()
+            )
+            // 인증 및 인가 과정에서 발생한 예외를 직접 처리
+            .exceptionHandling(exceptionHandling -> exceptionHandling
+                .authenticationEntryPoint(new FailedAuthenticationEntryPoint())
             )
             // JwtAuthenticationFilter를 UsernamePasswordAuthenticationFilter 이전에 등록
             .addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class);
@@ -104,6 +118,22 @@ public class WebSecurityConfig {
         source.registerCorsConfiguration("/**", configuration);
 
         return source;
+
+    }
+
+}
+
+// 인증 및 인가 실패 처리를 위한 커스텀 예외 (AuthenticationEntryPoint 인터페이스 구현)
+class FailedAuthenticationEntryPoint implements AuthenticationEntryPoint {
+
+    @Override
+    public void commence(HttpServletRequest request, HttpServletResponse response,
+            AuthenticationException authException) throws IOException, ServletException {
+
+                authException.printStackTrace();
+                response.setContentType("application/json;charset=UTF-8");
+                response.setStatus(HttpServletResponse.SC_FORBIDDEN);
+                response.getWriter().write("{\"message\":\"인증 및 인가에 실패했습니다.\"}");
 
     }
 
