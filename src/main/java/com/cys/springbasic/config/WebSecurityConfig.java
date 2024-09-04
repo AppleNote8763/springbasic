@@ -84,7 +84,7 @@ public class WebSecurityConfig {
                 // requestMatchers(): URL 패턴, HTTP 메서드 + URL 패턴, HTTP 메서드 마다 접근 허용 방식을 지정하는 메서드
                 // authenticated(): 인증된 모든 클라이언트가 접근할 수 있도록 지정
                 // permitAll(): 모든 클라이언트가 접근할 수 있도록 지정
-                .requestMatchers("/anyone/**").permitAll()
+                .requestMatchers("/anyone/**", "/auth/**").permitAll()
                 .requestMatchers(HttpMethod.GET, "/sample/jwt/*").permitAll()
                 // hasRole(권한): 특정 권한을 가진 클라이언트만 접근할 수 있도록 지정
                 .requestMatchers("/admin/**").hasRole("ADMIN")
