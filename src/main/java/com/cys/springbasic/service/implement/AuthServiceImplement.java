@@ -5,7 +5,9 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
 import com.cys.springbasic.dto.PostUserRequestDto;
+import com.cys.springbasic.dto.SignInRequestDto;
 import com.cys.springbasic.entity.SampleUserEntity;
+import com.cys.springbasic.provider.JwtProvider;
 import com.cys.springbasic.repository.SampleUserRepository;
 import com.cys.springbasic.service.AuthService;
 
@@ -15,6 +17,7 @@ import lombok.RequiredArgsConstructor;
 @RequiredArgsConstructor
 public class AuthServiceImplement implements AuthService {
 
+    private final JwtProvider jwtProvider;
     private final SampleUserRepository sampleUserRepository;
 
     // PasswordEncoder 인터페이스:
@@ -68,6 +71,31 @@ public class AuthServiceImplement implements AuthService {
             return "성공!";
 
         } catch(Exception exception) {
+            exception.printStackTrace();
+            return "예외발생!";
+        }
+
+    }
+
+    @Override
+    public String signIn(SignInRequestDto dto) {
+
+        try {
+
+            String userId = dto.getUserId();
+            SampleUserEntity userEntity = sampleUserRepository.findByUserId(userId);
+            if (userEntity == null) return "로그인 정보가 일치하지 않습니다.";
+
+            String password = dto.getPassword();
+            String encodedPassword = userEntity.getPassword();
+
+            boolean isMatched = passwordEncoder.matches(password, encodedPassword);
+            if (!isMatched) return "로그인 정보가 일치하지 않습니다.";
+
+            String token = jwtProvider.create(userId);
+            return token;
+
+        } catch (Exception exception) {
             exception.printStackTrace();
             return "예외발생!";
         }
