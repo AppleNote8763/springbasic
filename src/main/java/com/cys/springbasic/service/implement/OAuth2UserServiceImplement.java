@@ -6,6 +6,7 @@ import org.springframework.security.oauth2.core.OAuth2AuthenticationException;
 import org.springframework.security.oauth2.core.user.OAuth2User;
 import org.springframework.stereotype.Service;
 
+import com.cys.springbasic.service.object.CustomOAuth2User;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
 @Service
@@ -30,7 +31,9 @@ public class OAuth2UserServiceImplement extends DefaultOAuth2UserService {
             exception.printStackTrace();
         }
 
-        return oAuth2User;
+        // 데이터베이스 작업이 들어감
+
+        return new CustomOAuth2User(oAuth2User.getName(), oAuth2User.getAttributes());
 
     }
 
